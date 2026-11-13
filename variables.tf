@@ -30,5 +30,29 @@ EOT
       event_payload_key = optional(string)
     })))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.billing_meters : (
+        v.event_time_window == null || (contains(["day", "hour"], v.event_time_window))
+      )
+    ])
+    error_message = "must be one of: \"day\", \"hour\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.billing_meters : (
+        v.customer_mapping == null || alltrue([for item in v.customer_mapping : (contains(["by_id"], item.type))])
+      )
+    ])
+    error_message = "must be one of: \"by_id\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.billing_meters : (
+        v.default_aggregation == null || alltrue([for item in v.default_aggregation : (contains(["count", "last", "sum"], item.formula))])
+      )
+    ])
+    error_message = "must be one of: \"count\", \"last\", \"sum\""
+  }
 }
 
